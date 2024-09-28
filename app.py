@@ -18,6 +18,9 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
+        # Log incoming request
+        print("Received request data:", request.json)
+
         # Extract the data from the request
         data = request.json
         
@@ -25,16 +28,19 @@ def predict():
         required_fields = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'Age', 'Pregnancies', 'model']
         for field in required_fields:
             if field not in data:
+                print(f"Missing key: {field}")
                 return jsonify({'error': f'Missing key: {field}'}), 400
-        
-        # Create features array
+
+        # Create features array and log them
         features = np.array([[
             data['Glucose'], data['BloodPressure'], data['SkinThickness'],
             data['Insulin'], data['BMI'], data['Age'], data['Pregnancies']
         ]])
+        print(f"Features array: {features}")
 
-        # Select the model based on the user's choice
+        # Select the model based on the user's choice and log the selection
         model_choice = data.get('model', 'lr')
+        print(f"Model selected: {model_choice}")
 
         if model_choice == 'svm':
             prediction = svm_model.predict(features)
@@ -45,12 +51,18 @@ def predict():
         else:
             prediction = lr_model.predict(features)
 
+        # Log the prediction result
+        print(f"Prediction result: {prediction}")
+
         result = 'Diabetic Retinopathy Detected' if prediction[0] == 1 else 'No Diabetic Retinopathy'
         return jsonify({'prediction': result})
 
     except KeyError as e:
+        print(f"KeyError: {e}")
         return jsonify({'error': f'Missing key: {str(e)}'}), 400
     except Exception as e:
+        # Print the full error message to logs
+        print(f"Exception: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
