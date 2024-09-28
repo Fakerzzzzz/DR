@@ -5,7 +5,7 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Load the pre-trained models
+# Load pre-trained models (ensure the paths are correct)
 lr_model = load('lr_model.pkl')
 svm_model = load('svm_model.pkl')
 knn_model = load('knn_model.pkl')
@@ -18,27 +18,27 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Log incoming request
-        print("Received request data:", request.json)
+        # Log the incoming request data
+        print("Request Data:", request.json)
 
         # Extract the data from the request
         data = request.json
-        
-        # Ensure all required fields are present
+
+        # Check if required fields are present
         required_fields = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'Age', 'Pregnancies', 'model']
         for field in required_fields:
             if field not in data:
-                print(f"Missing key: {field}")
-                return jsonify({'error': f'Missing key: {field}'}), 400
+                print(f"Missing field: {field}")
+                return jsonify({'error': f'Missing field: {field}'}), 400
 
-        # Create features array and log them
+        # Create features array and log the features
         features = np.array([[
             data['Glucose'], data['BloodPressure'], data['SkinThickness'],
             data['Insulin'], data['BMI'], data['Age'], data['Pregnancies']
         ]])
-        print(f"Features array: {features}")
+        print("Features Array:", features)
 
-        # Select the model based on the user's choice and log the selection
+        # Select the model and log the selected model
         model_choice = data.get('model', 'lr')
         print(f"Model selected: {model_choice}")
 
@@ -62,7 +62,7 @@ def predict():
         return jsonify({'error': f'Missing key: {str(e)}'}), 400
     except Exception as e:
         # Print the full error message to logs
-        print(f"Exception: {str(e)}")
+        print(f"Error occurred: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
